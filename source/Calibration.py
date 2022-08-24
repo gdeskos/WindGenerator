@@ -69,7 +69,7 @@ class CalibrationProblem:
     def parameters(self):
         NN_parameters = parameters_to_vector(self.OPS.parameters())
         with torch.no_grad():
-            param_vec = NN_parameters.numpy()
+            param_vec = NN_parameters.cpu().numpy()
         return param_vec
 
     @parameters.setter
@@ -144,8 +144,12 @@ class CalibrationProblem:
 
         self.k1_data_pts = torch.tensor(DataPoints, dtype=torch.float64)[
             :, 0].squeeze()
-        self.kF_data_vals = torch.tensor([DataValues[:, i, i] for i in range(
+        [DataValues[:, i, i] for i in range(
             3)] + [DataValues[:, 0, 2]], dtype=torch.float64)
+        # create a single numpy.ndarray with numpy.array() and then convert to a porch tensor
+        single_data_array=numpy.array( [DataValues[:, i, i] for i in range(
+            3)] + [DataValues[:, 0, 2]])
+        self.kF_data_vals = torch.tensor(single_data_array, dtype=torch.float64)
 
         k1_data_pts, y_data0 = self.k1_data_pts, self.kF_data_vals
         # self.x, self.y, self.y_data = k1_data_pts

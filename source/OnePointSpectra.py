@@ -42,9 +42,9 @@ class OnePointSpectra(nn.Module):
 
 
     def update_scales(self):
-        self.LengthScale = torch.exp(self.logLengthScale)
-        self.TimeScale   = torch.exp(self.logTimeScale)
-        self.Magnitude   = torch.exp(self.logMagnitude)
+        self.LengthScale = torch.exp(self.logLengthScale) #this is L
+        self.TimeScale   = torch.exp(self.logTimeScale) #this is gamma
+        self.Magnitude   = torch.exp(self.logMagnitude) #this is sigma
         return self.LengthScale.item(), self.TimeScale.item(), self.Magnitude.item()
 
 

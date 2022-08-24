@@ -105,20 +105,19 @@ class OnePointSpectra(nn.Module):
         elif self.type_EddyLifetime == 'TwoThird':
             tau = kL**(-2/3)
         elif self.type_EddyLifetime == 'tauNet':
-            tau0 = self.InitialGuess_EddyLifetime(k.norm(dim=-1))
-            tau  = tau0 + self.tauNet(k)
+            tau0 = self.InitialGuess_EddyLifetime(kL)
+            tau  = tau0 + self.tauNet(k*self.LengthScale) # This takes a vector as input
         else:
             raise Exception('Wrong EddyLifetime model !')
         return self.TimeScale * tau
 
 
     @torch.jit.export
-    def InitialGuess_EddyLifetime(self, k_norm): 
-        # tau0 = MannEddyLifetime(0.59*k_norm) 
-        # tau0 = k_norm**(-2/3)
-        tau0 = 0
+    def InitialGuess_EddyLifetime(self, kL_norm): 
+        tau0 = MannEddyLifetime(kL_norm) 
+        #tau0 = Lk_norm**(-2/3)
+        #tau0 = 0
         return tau0
-
 
     ###------------------------------------------- 
 

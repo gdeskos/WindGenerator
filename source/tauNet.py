@@ -22,6 +22,7 @@ class tauNet(nn.Module):
         self.Ra = Rational(nModes=self.nModes, learn_nu=self.fg_learn_nu)
 
         # self.T = nn.Linear(3,3,bias=False).double()
+        
 
         self.sign = torch.tensor([1, -1, 1], dtype=torch.float64).detach()
 

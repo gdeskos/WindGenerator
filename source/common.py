@@ -11,9 +11,7 @@ Von Karman energy spectrum (without scaling)
 
 @torch.jit.script
 def VKEnergySpectrum(kL):
-    p  = 4
-    cL = 1
-    return kL**p / (cL+kL**2)**(5/6+p/2)
+    return kL**4 / (1.+kL**2)**(17./6.)
 
 
 """

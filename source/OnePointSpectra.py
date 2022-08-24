@@ -155,5 +155,5 @@ class OnePointSpectra(nn.Module):
                 k1*Phi11 + k2*Phi12 + k3*Phi13,
                 k1*Phi12 + k2*Phi22 + k3*Phi23,
                 k1*Phi13 + k2*Phi23 + k3*Phi33  
-            ]) / (1/3 * (Phi11+Phi22+Phi33))
+            ]) / (1./3. * (Phi11+Phi22+Phi33))
         return div

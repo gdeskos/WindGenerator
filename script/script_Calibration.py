@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../')
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import matplotlib.pyplot as plt
 from pylab import *
@@ -27,10 +31,14 @@ config = {
     'regularization'    :   1.e-1,
     'nepochs'           :   200,
     'curves'            :   [0,1,2,3],
-    'data_type'         :   'Kaimal', ### 'Kaimal', 'SimiuScanlan', 'SimiuYeo', 'iso'
+    'data_type'         :   'IEC_KSEC', ### 'Kaimal', 'SimiuScanlan', 'SimiuYeo', 'iso'
+    'Vhub'              :   10, # m/s
+    'zhub'              :   150, #m
+    'sigma1'            :   1.834,
+    'Lambda1'           :   42,
     'domain'            :   np.logspace(-1, 2, 20), ### NOTE: Experiment 1: np.logspace(-1, 2, 20), Experiment 2: np.logspace(-2, 2, 40)
     'noisy_data'        :   0*3.e-1, ### level of the data noise  ### NOTE: Experiment 1: zero, Experiment 2: non-zero
-    'output_folder'     :   '/home/khristen/Projects/Brendan/2020_ontheflygenerator/code/data/'
+    'output_folder'     :   '/Users/gdeskos/WindGenerator/data/'
 }
 pb = CalibrationProblem(**config)
 
@@ -39,28 +47,25 @@ pb = CalibrationProblem(**config)
 ### Initialize Parameters
 ####################################
 
-### User-defined
-# L     = 0.79 # 0.59
-# Gamma = 4
-# sigma = 2.8 #3.2
+#Calculating turbulence parameters according to IEC standards
+# we assume a hub height z=150m corresponding to the IEA 15MW wind turbine hub height
+zhub=150; # Hub height in meters
+Vhub=10.; # Average Hub height velocity in m/s
+Iref = 0.14
+sigma1=Iref*(0.75*Vhub+5.6)
+Lambda1=42; # Longitudinal turbulence scale parameter at hub height
 
-### Kaimmal
-L     = 0.59
+print(sigma1, Lambda1)
+
+#Mann model parameters
 Gamma = 3.9
-sigma = 3.2
-
-### Simiu
-# L     = 0.79
-# Gamma = 3.8
-# sigma = 2.8
-
-sigma = sigma * L**(5/3) / (4*np.pi)
+sigma = 0.55*sigma1
+L=0.8*Lambda1;
 
 parameters = pb.parameters
 parameters[:3] = [log(L), log(Gamma), log(sigma)]
 pb.parameters = parameters[:len(pb.parameters)]
 pb.print_parameters()
-
 
 ####################################
 ### Initialize Data
@@ -100,14 +105,13 @@ plt.show()
 ####################################
 ### Calibrate
 ####################################
-opt_params = pb.calibrate(Data=Data, **config)#, OptimizerClass=torch.optim.RMSprop)
-
+#opt_params = pb.calibrate(Data=Data, **config)#, OptimizerClass=torch.optim.RMSprop)
 
 ####################################
 ### Export
 ####################################
-if 'opt_params' not in locals():
-    opt_params = pb.parameters
-filename = config['output_folder'] + config['type_EddyLifetime'] + '_' + config['data_type'] + '.pkl'
-with open(filename, 'wb') as file:
-    pickle.dump([config, opt_params, Data, pb.loss_history_total, pb.loss_history_epochs], file)
+#if 'opt_params' not in locals():
+#    opt_params = pb.parameters
+#filename = config['output_folder'] + config['type_EddyLifetime'] + '_' + config['data_type'] + '.pkl'
+#with open(filename, 'wb') as file:
+#    pickle.dump([config, opt_params, Data, pb.loss_history_total, pb.loss_history_epochs], file)

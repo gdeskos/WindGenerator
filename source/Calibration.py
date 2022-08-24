@@ -125,7 +125,7 @@ class CalibrationProblem:
         return out.numpy()
 
     # -----------------------------------------
-    # Clibration method
+    # Calibration method
     # -----------------------------------------
 
     def calibrate(self, **kwargs):

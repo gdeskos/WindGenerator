@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../')
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from math import *
 from source.OnePointSpectra import OnePointSpectra
 import numpy as np
@@ -16,9 +20,9 @@ from source.Calibration import CalibrationProblem
 class GenerateWind:
 
     def __init__(self, friction_velocity, reference_height, grid_dimensions, grid_levels, seed=None, blend_num=10, **kwargs):
-        
-        model = kwargs.get('model', 'Mann') ### 'FPDE_RDT', 'Mann', 'VK', 'NN'
-        
+
+        model = kwargs.get('model','Mann') ### 'FPDE_RDT', 'Mann', 'VK', 'NN'
+        print(model)
         # # Parameters taken from pg 13 of M. Andre's dissertation
         # # model = 'FPDE_RDT'
         # model = 'Mann'
@@ -94,7 +98,7 @@ class GenerateWind:
         self.total_wind = np.zeros(wind_shape)
 
         ### Random field object
-
+        print(model)
         if model == 'VK':
             self.Covariance = VonKarmanCovariance(ndim=3, length_scale=L, E0=E0)
             self.RF = VectorGaussianRandomField(**kwargs, ndim=3, grid_level=grid_levels, grid_dimensions=grid_dimensions, sampling_method='vf_fftw', grid_shape=self.noise_shape[:-1], Covariance=self.Covariance)
@@ -112,7 +116,7 @@ class GenerateWind:
             self.Covariance = NNCovariance(ndim=3, length_scale=L, E0=E0, Gamma=Gamma, OnePointSpectra=pb.OPS, h_ref=reference_height)
             self.RF = VectorGaussianRandomField(**kwargs, ndim=3, grid_level=grid_levels, grid_dimensions=grid_dimensions, sampling_method='vf_fftw', grid_shape=self.noise_shape[:-1], Covariance=self.Covariance)
 
-        
+
         self.RF.reseed(self.seed)
         # self.RS = np.random.RandomState(seed=self.seed)
 
@@ -154,18 +158,19 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    normalize = True
-    friction_velocity = 2.683479938442173
-    reference_height = 180.0
-    roughness_height = 0.75
-    grid_dimensions = np.array([1200.0, 864.0, 576.0])
-    grid_levels = np.array([7, 7, 7])
+    normalize = False
+    friction_velocity = 0.45
+    reference_height = 90.
+    roughness_height = 0.1
+    grid_dimensions = np.array([1000.0, 3000, 1000])
+    grid_levels = np.array([5, 5, 5])
     seed = None #9000
 
-    path_to_parameters = 'data/tauNet_Kaimal_pen_reg.pkl'
+    path_to_parameters = '../data/tauNet_Kaimal.pkl'
 
-    # wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
-    wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='Mann', path_to_parameters=path_to_parameters)
+    wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='FPDE_RDT', path_to_parameters=path_to_parameters)
+    #wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
+    #wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='Mann', path_to_parameters=path_to_parameters)
     for _ in range(4):
         wind()
     wind_field = wind.total_wind
@@ -175,7 +180,7 @@ if __name__ == "__main__":
         # h = np.array(1/wind_field.shape[0],1/wind_field.shape[1],1/wind_field.shape[2])
         sd = np.sqrt(np.mean(wind_field**2))
         wind_field = wind_field/sd
-        wind_field *= 4.26 # rescale to match Mann model 
+        wind_field *= 4.26 # rescale to match Mann model
 
     # plt.imshow(wind_field[:,0,:,0])
     # plt.show()
@@ -198,11 +203,11 @@ if __name__ == "__main__":
     # wind_field = mean_profile
     wind_field += mean_profile
 
-    wind_field *= 40/63
+    #wind_field *= 40/63
 
     ###################
     ## Export to vtk
-    FileName = 'data/WindField/OntheFlyWindField'
+    FileName = '../data/WindField/OntheFlyWindField'
     spacing = tuple(grid_dimensions/(2.0**grid_levels + 1))
 
     wind_field_vtk = tuple([np.copy(wind_field[...,i], order='C') for i in range(3)])

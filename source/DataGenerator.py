@@ -4,7 +4,7 @@ import torch
 
 
 ####################################################################
-#   One Point Spectra Data Generator 
+#   One Point Spectra Data Generator
 #   (iso, shear: Kaimal, Simiu-Scanlan, Simiu-Yeo)
 ####################################################################
 
@@ -15,11 +15,16 @@ class OnePointSpectraDataGenerator:
         self.flow_type  = kwargs.get('flow_type', 'shear')  # 'shear', 'iso'
         self.data_type  = kwargs.get('data_type', 'Kaimal') # 'Kaimal', 'Simiu-Scanlan', 'Simiu-Yeo'
 
+        self.zref= kwargs.get('zref',1)
+        self.Uref = kwargs.get('Uref',1)
+
         if self.flow_type == 'iso':
             self.eval = self.eval_iso
         elif self.flow_type == 'shear':
             if self.data_type == 'Kaimal':
                 self.eval = self.eval_shear_Kaimal
+            elif self.data_type == 'IEC_KSEC':
+                self.eval = self.eval_shear_IEC_KSEC
             elif self.data_type == 'SimiuScanlan':
                 self.eval = self.eval_shear_SimiuScanlan
             elif self.data_type == 'SimiuYeo':
@@ -27,7 +32,7 @@ class OnePointSpectraDataGenerator:
             elif self.data_type == 'iso':
                 self.eval = self.eval_iso
             else:
-                raise Exception()         
+                raise Exception()
         else:
             raise Exception()
 
@@ -57,13 +62,18 @@ class OnePointSpectraDataGenerator:
         F[2,2] = 3/110 * C * (3*L**(-2) + 8*k1**2) / (L**(-2) + k1**2) **(11/6)
         return k1*F
 
-    def eval_shear_Kaimal(self, k1, z=1):
+    def eval_shear_Kaimal(self,k1,z=1):
+        z=self.zref
         n = 1/(2*pi) * k1 * z
         F = np.zeros([3,3])
-        F[0,0] = 52.5 * n / (1 + 33*n)**(5/3)
-        F[1,1] = 8.5  * n / (1 + 9.5*n)**(5/3)
-        F[2,2] = 1.05 * n / (1 + 5.3*n**(5/3))
-        F[0,2] = -7  * n / (1 + 9.6*n)**(2.4)        
+        F[0,0] = 102 * n / (1 + 33*n)**(5/3)
+        F[1,1] = 17  * n / (1 + 9.5*n)**(5/3)
+        F[2,2] = 2.1 * n / (1 + 5.3*n**(5/3))
+        F[0,2] = -12  * n / (1 + 9.6*n)**(7./3.)
+        return F
+
+    def eval_shear_IEC_KSEC(self, k1, z=1):
+        F = np.zeros([3,3])
         return F
 
     def eval_shear_SimiuScanlan(self, k1, z=1):
@@ -77,7 +87,7 @@ class OnePointSpectraDataGenerator:
     def eval_shear_SimiuYeo(self, k1, z=1):
         n = 1/(2*pi) * k1 * z
         F = np.zeros([3,3])
-        F[0,0] = 100  * n / (1 + 50*n)**(5/3)
+        F[0,0] = 102  * n / (1 + 50*n)**(5/3)
         F[1,1] = 7.5  * n / (1 + 10*n)**(5/3)
         F[2,2] = 1.68 * n / (1 + 10*n**(5/3))
         return F
@@ -104,7 +114,7 @@ class CoherenceDataGenerator:
         return self.Data
 
 
-    def eval(self, k1, y, z):        
+    def eval(self, k1, y, z):
         Vhub = 6
         Lc   = 8.1*42
         r    = np.sqrt(y**2+z**2)

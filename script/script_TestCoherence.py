@@ -36,14 +36,14 @@ config = {
     'data_type'         :   'Kaimal', ### 'Kaimal', 'SimiuScanlan', 'SimiuYeo', 'iso'
     'domain'            :   np.logspace(-1, 2, 20), ### NOTE: Experiment 1: np.logspace(-1, 2, 20), Experiment 2: np.logspace(-2, 2, 40)
     'noisy_data'        :   0*3.e-1, ### level of the data noise  ### NOTE: Experiment 1: zero, Experiment 2: non-zero
-    'output_folder'     :   '/home/khristen/Projects/Brendan/2020_ontheflygenerator/code/data/',
+    'output_folder'     :   '/Users/gdeskos/WindGenerator/data/',
     'fg_coherence'      :   True,
 }
 SpCoh = SpectralCoherence(**config)
 
 
 ####################################
-#  Initialize Data 
+#  Initialize Data
 # (One-point specrtra data)
 ####################################
 
@@ -54,7 +54,7 @@ Data_OPS = OnePointSpectraDataGenerator(DataPoints=DataPoints, **config).Data
 
 
 ####################################
-#  Initialize Data 
+#  Initialize Data
 # (Coherence data)
 ####################################
 
@@ -97,8 +97,8 @@ plt.show()
 exit()
 
 zero_ind = 5
-ten_ind = 6 
-thirty_ind = 8 
+ten_ind = 6
+thirty_ind = 8
 fifty_ind = -1
 
 plt.figure()

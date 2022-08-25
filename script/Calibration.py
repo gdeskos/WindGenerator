@@ -43,7 +43,7 @@ config = {
     'lr'                :   1,     ### learning rate
     'penalty'           :   1.e-1,
     'regularization'    :   1.e-1,
-    'nepochs'           :   200,
+    'nepochs'           :   400,
     'curves'            :   [0,1,2,3],
     'data_type'         :   'Kaimal', ### 'Kaimal', 'SimiuScanlan', 'SimiuYeo', 'iso'
     'Uref'              :   10, # m/s
@@ -82,11 +82,9 @@ ustar=0.41*Uref/log(zref/z0)
 
 L     = 0.59*zref
 Gamma = 3.9
-sigma = 6.4/zref**(2./3.)
+sigma = 6.4/zref**(2./3.) * L**(5./3.)
 
 print(L,Gamma,sigma)
-
-sigma = sigma * L**(5./3.)
 
 parameters = pb.parameters
 parameters[:3] = [log(L), log(Gamma), log(sigma)] #All of these parameters are positive

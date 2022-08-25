@@ -144,10 +144,9 @@ class CalibrationProblem:
 
         self.k1_data_pts = torch.tensor(DataPoints, dtype=torch.float64)[
             :, 0].squeeze()
-        [DataValues[:, i, i] for i in range(
-            3)] + [DataValues[:, 0, 2]], dtype=torch.float64)
+
         # create a single numpy.ndarray with numpy.array() and then convert to a porch tensor
-        single_data_array=numpy.array( [DataValues[:, i, i] for i in range(
+        single_data_array=np.array( [DataValues[:, i, i] for i in range(
             3)] + [DataValues[:, 0, 2]])
         self.kF_data_vals = torch.tensor(single_data_array, dtype=torch.float64)
 

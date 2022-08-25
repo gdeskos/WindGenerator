@@ -3,6 +3,7 @@
 import torch
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 import matplotlib.pyplot as plt
+plt.rcParams.update(plt.rcParamsDefault)
 from pylab import *
 import time
 
@@ -301,8 +302,11 @@ class CalibrationProblem:
             DataPoints, DataValues = Data
             self.k1_data_pts = torch.tensor(DataPoints, dtype=torch.float64)[
                 :, 0].squeeze()
-            self.kF_data_vals = torch.tensor([DataValues[:, i, i] for i in range(
-                3)] + [DataValues[:, 0, 2]], dtype=torch.float64)
+            # create a single numpy.ndarray with numpy.array() and then convert to a porch tensor
+            single_data_array=np.array( [DataValues[:, i, i] for i in range(
+            3)] + [DataValues[:, 0, 2]])
+
+            self.kF_data_vals = torch.tensor(single_data_array, dtype=torch.float64)
 
         k1 = self.k1_data_pts
         k = torch.stack([0*k1, k1, 0*k1], dim=-1)

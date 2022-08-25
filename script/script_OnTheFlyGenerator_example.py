@@ -37,7 +37,7 @@ class GenerateWind:
             pb = CalibrationProblem(**config)
             pb.parameters = parameters
             L, T, M = pb.OPS.update_scales()
-            M = (4*np.pi) * L**(-5/3) * M
+            M = L**(-5/3) * M
             print('Scales: ', [L, T, M] )
             E0 = M * friction_velocity**2 * reference_height**(-2/3)
             L  = L * reference_height
@@ -159,16 +159,16 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     normalize = False
-    friction_velocity = 0.45
+    friction_velocity = 0.1
     reference_height = 90.
-    roughness_height = 0.1
+    roughness_height = 0.01
     grid_dimensions = np.array([1000.0, 3000, 1000])
     grid_levels = np.array([5, 5, 5])
     seed = None #9000
 
     path_to_parameters = '../data/tauNet_Kaimal.pkl'
 
-    wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='FPDE_RDT', path_to_parameters=path_to_parameters)
+    wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
     #wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
     #wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='Mann', path_to_parameters=path_to_parameters)
     for _ in range(4):

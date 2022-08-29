@@ -12,48 +12,45 @@ class OnePointSpectraDataGenerator:
 
     def __init__(self, **kwargs):
         self.DataPoints = kwargs.get('DataPoints', None)
-        self.flow_type  = kwargs.get('flow_type', 'shear')  # 'shear', 'iso'
-        self.data_type  = kwargs.get('data_type', 'Kaimal') # 'Kaimal', 'Simiu-Scanlan', 'Simiu-Yeo'
+        self.data_type  = kwargs.get('data_type', 'Kaimal') # 'Kaimal', 'Custom', 'Simiu-Scanlan', 'Simiu-Yeo'
 
         self.zref= kwargs.get('zref',1)
         self.Uref = kwargs.get('Uref',1)
 
-        if self.flow_type == 'iso':
-            self.eval = self.eval_iso
-        elif self.flow_type == 'shear':
-            if self.data_type == 'Kaimal':
-                self.eval = self.eval_shear_Kaimal
-            elif self.data_type == 'IEC_KSEC':
-                self.eval = self.eval_shear_IEC_KSEC
-            elif self.data_type == 'SimiuScanlan':
-                self.eval = self.eval_shear_SimiuScanlan
-            elif self.data_type == 'SimiuYeo':
-                self.eval = self.eval_shear_SimiuYeo
-            elif self.data_type == 'iso':
-                self.eval = self.eval_iso
+        if self.data_type == 'VK':
+            self.eval = self.eval_VK
+        elif self.data_type == 'Kaimal':
+            self.eval = self.eval_Kaimal
+        elif self.data_type == 'IEC':
+            self.eval = self.eval_IEC
+        elif self.data_type == 'Custom':
+            if kwargs.get('spectra_file') is not None:
+                print('Reading file' + kwargs.get('spectra_file') + '\n')
+                spectra_file=kwargs.get('spectra_file')
+                self.CustomData=np.genfromtxt(spectra_file,skip_header=1,delimiter=',')
             else:
-                raise Exception()
+                raise Exception('Custom spectra_file not found')
         else:
-            raise Exception()
+            raise Exception('No data type was provided')
 
         if self.DataPoints is not None:
             self.generate_Data(self.DataPoints)
 
     def generate_Data(self, DataPoints):
         DataValues = np.zeros([len(DataPoints), 3, 3])
-        for i, Point in enumerate(DataPoints):
-            DataValues[i] = self.eval(*Point)
+        if self.data_type == 'Custom':
+            DataValues[:,0,0]=self.CustomData[:,1]
+            DataValues[:,1,1]=self.CustomData[:,2]
+            DataValues[:,2,2]=self.CustomData[:,3]
+            DataValues[:,0,2]=self.CustomData[:,4]
+        else:
+            for i, Point in enumerate(DataPoints):
+                DataValues[i] = self.eval(*Point)
+
         self.Data = ( DataPoints, DataValues )
         return self.Data
 
-
-    #=============================================
-    # Models
-    #=============================================
-
-    ### TODO: correct spectra ? off-diagonal ?
-
-    def eval_iso(self, k1, z=1):
+    def eval_VK(self, k1, z=1):
         C = 3.2
         L = 0.59
         F = np.zeros([3,3])
@@ -62,7 +59,7 @@ class OnePointSpectraDataGenerator:
         F[2,2] = 3/110 * C * (3*L**(-2) + 8*k1**2) / (L**(-2) + k1**2) **(11/6)
         return k1*F
 
-    def eval_shear_Kaimal(self,k1,z=1):
+    def eval_Kaimal(self,k1,z=1):
         z=self.zref
         n = 1/(2*pi) * k1 * z
         F = np.zeros([3,3])
@@ -72,53 +69,7 @@ class OnePointSpectraDataGenerator:
         F[0,2] = -12  * n / (1 + 9.6*n)**(7./3.)
         return F
 
-    def eval_shear_IEC_KSEC(self, k1, z=1):
+    def eval_IEC(self, k1, z=1):
         F = np.zeros([3,3])
         return F
 
-    def eval_shear_SimiuScanlan(self, k1, z=1):
-        n = 1/(2*pi) * k1 * z
-        F = np.zeros([3,3])
-        F[0,0] = 100  * n / (1 + 50*n)**(5/3)
-        F[1,1] = 7.5  * n / (1 + 9.5*n)**(5/3)
-        F[2,2] = 1.68 * n / (1 + 10*n**(5/3))
-        return F
-
-    def eval_shear_SimiuYeo(self, k1, z=1):
-        n = 1/(2*pi) * k1 * z
-        F = np.zeros([3,3])
-        F[0,0] = 102  * n / (1 + 50*n)**(5/3)
-        F[1,1] = 7.5  * n / (1 + 10*n)**(5/3)
-        F[2,2] = 1.68 * n / (1 + 10*n**(5/3))
-        return F
-
-
-####################################################################
-
-####################################################################
-
-class CoherenceDataGenerator:
-
-    def __init__(self, **kwargs):
-        self.DataPoints = kwargs.get('DataPoints', None)
-        if torch.is_tensor(self.DataPoints):
-            self.DataPoints = self.DataPoints.cpu().detach().numpy()
-        if self.DataPoints is not None:
-            self.generate_Data(self.DataPoints)
-
-    def generate_Data(self, DataPoints):
-        DataValues = np.zeros([len(DataPoints), 1])
-        for i, Point in enumerate(DataPoints):
-            DataValues[i] = self.eval(*Point)
-        self.Data = ( DataPoints, DataValues )
-        return self.Data
-
-
-    def eval(self, k1, y, z):
-        Vhub = 6
-        Lc   = 8.1*42
-        r    = np.sqrt(y**2+z**2)
-        f    = k1
-        x = (f*r/Vhub)**2 + (0.12*r/Lc)**2
-        g = np.exp(-12*x**0.5)
-        return g

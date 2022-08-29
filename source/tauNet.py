@@ -30,7 +30,6 @@ class tauNet(nn.Module):
         return 0.5*(f(k) + f(k*self.sign))
 
 
-
     def forward(self, k):
         # NN    = self.sym(self.NN, k)
         # NN    = self.NN(k**2)

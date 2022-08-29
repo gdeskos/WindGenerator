@@ -54,7 +54,7 @@ class CalibrationProblem:
             self.initialize_parameters_with_noise()
 
         self.vdim = 3
-
+        self.output_directory = kwargs.get('output_folder','/home/gdeskos/WindGenerator/')
         self.fg_coherence = kwargs.get("fg_coherence", False)
         if self.fg_coherence:
             self.Coherence = SpectralCoherence(**kwargs)
@@ -352,13 +352,13 @@ class CalibrationProblem:
             self.ax[0].set_xscale('log')
             self.ax[0].set_yscale('log')
             self.ax[0].set_xlabel(r'$k_1$')
-            self.ax[0].set_ylabel(r'$k_1 F_i$')
+            self.ax[0].set_ylabel(r'$k_1 F_i /u_*^2$')
             self.ax[0].grid(which='both')
             self.ax[0].set_aspect(3/4)
 
             if plt_tau:
                 # Subplot 2: Eddy Lifetime
-                self.ax[1].set_title('Eddy liftime')
+                self.ax[1].set_title('Eddy lifetime')
                 self.tau_model1 = self.OPS.EddyLifetime(k_1).detach().numpy()
                 self.tau_model2 = self.OPS.EddyLifetime(k_2).detach().numpy()
                 self.tau_model3 = self.OPS.EddyLifetime(k_3).detach().numpy()
@@ -421,8 +421,8 @@ class CalibrationProblem:
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
         else:
-            self.fig.show()
-            plt.show()
+            self.fig.savefig(self.output_directory+'Final_solution.png',format='png',dpi=100)
+            plt.fig.savefig(self.output_directory+'Final_solution.png',format='png',dpi=100)
 
 
 ############################################################################

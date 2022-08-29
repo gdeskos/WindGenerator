@@ -24,14 +24,6 @@ class OnePointSpectra(nn.Module):
 
         if self.type_EddyLifetime == 'tauNet':
             self.tauNet = tauNet(**kwargs)
-        # if self.type_PowerSpectra == 'zetaNet':
-        #     self.zetaNet1 = zetaNet(**kwargs)
-        #     self.zetaNet2 = zetaNet(**kwargs)
-        # if self.type_PowerSpectra == 'C3Net':
-        #     self.C3Net = NET_C3_Corrector(**kwargs)
-        # if self.type_PowerSpectra == 'Corrector':
-        #     self.Corrector = NET_Corrector(**kwargs)
-
 
     ###-------------------------------------------
 
@@ -115,8 +107,6 @@ class OnePointSpectra(nn.Module):
     @torch.jit.export
     def InitialGuess_EddyLifetime(self, kL_norm): 
         tau0 = MannEddyLifetime(kL_norm) 
-        #tau0 = Lk_norm**(-2/3)
-        #tau0 = 0
         return tau0
 
     ###------------------------------------------- 

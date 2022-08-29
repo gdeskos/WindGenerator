@@ -164,9 +164,9 @@ opt_params = pb.calibrate(Data=Data, **config)#, OptimizerClass=torch.optim.RMSp
 ####################################
 ### Export
 ####################################
-#if 'opt_params' not in locals():
-#    opt_params = pb.parameters
-#filename = config['output_folder'] + config['type_EddyLifetime'] + '_' + config['data_type'] + '.pkl'
-#with open(filename, 'wb') as file:
-#    pickle.dump([config, opt_params, Data, pb.loss_history_total, pb.loss_history_epochs], file)
+if 'opt_params' not in locals():
+    opt_params = pb.parameters
+filename = config['output_folder'] + config['type_EddyLifetime'] + '_' + config['data_type'] + '.pkl'
+with open(filename, 'wb') as file:
+    pickle.dump([config, opt_params, Data, pb.loss_history_total, pb.loss_history_epochs], file)
 

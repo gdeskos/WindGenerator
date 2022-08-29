@@ -42,7 +42,7 @@ class OnePointSpectraDataGenerator:
             DataValues[:,0,0]=self.CustomData[:,1]
             DataValues[:,1,1]=self.CustomData[:,2]
             DataValues[:,2,2]=self.CustomData[:,3]
-            DataValues[:,0,2]=self.CustomData[:,4]
+            DataValues[:,0,2]=-self.CustomData[:,4]
         else:
             for i, Point in enumerate(DataPoints):
                 DataValues[i] = self.eval(*Point)

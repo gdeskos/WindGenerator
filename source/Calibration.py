@@ -3,7 +3,8 @@
 import torch
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 import matplotlib.pyplot as plt
-plt.rcParams.update(plt.rcParamsDefault)
+plt.rc('text',usetex=True)
+plt.rc('font',family='serif')
 from pylab import *
 import time
 
@@ -138,7 +139,7 @@ class CalibrationProblem:
         tol = kwargs.get('tol', 1e-3)
         nepochs = kwargs.get('nepochs', 100)
         show = kwargs.get('show', False)
-        self.curves = kwargs.get('curves', [0, 1, 2, 3])
+        self.curves = kwargs.get('curves', [0, 1, 2,3])
 
         alpha_pen = kwargs.get('penalty', 0)
         alpha_reg = kwargs.get('regularization', 0)
@@ -204,7 +205,8 @@ class CalibrationProblem:
                 reg = theta_NN.square().mean()
             return reg
 
-        def loss_fn(model, target):
+        def loss_fn(model, target,weights):
+            #y = torch.abs((model-target)).square()
             y = torch.log(torch.abs(model/target)).square()
             # y = ( (model-target)/(target) ).square()
             # y = 0.5*(y[...,:-1]+y[...,1:])
@@ -215,7 +217,8 @@ class CalibrationProblem:
 
         # self.loss_fn = LossFunc()
         self.loss_fn = loss_fn
-        self.loss = self.loss_fn(y[self.curves], y_data[self.curves])
+        w = torch.abs(y)/torch.sum(torch.abs(y[:,0]))
+        self.loss = self.loss_fn(y[self.curves], y_data[self.curves], w[self.curves])
 
         self.loss_history_total = []
         self.loss_history_epochs = []
@@ -228,7 +231,8 @@ class CalibrationProblem:
             def closure():
                 optimizer.zero_grad()
                 y = self.OPS(k1_data_pts)
-                self.loss = self.loss_fn(y[self.curves[i:]], y_data[self.curves[i:]])
+                w = k1_data_pts*y_data/torch.sum(k1_data_pts*y_data)
+                self.loss = self.loss_fn(y[self.curves[i:]], y_data[self.curves[i:]],w[self.curves[i:]])
                 if self.fg_coherence:
                     w1, w2 = 1, 1 ### weights to balance the coherence misfit and others
                     y_coh     = self.Coherence(k1_data_pts, Delta_y_data_pts, Delta_z_data_pts)
@@ -328,7 +332,7 @@ class CalibrationProblem:
             nrows = 1
             ncols = 2 if plt_tau else 1
             self.fig, self.ax = subplots(
-                nrows=nrows, ncols=ncols, num='Calibration', clear=True, figsize=[20, 10])
+                nrows=nrows, ncols=ncols, num='Calibration', clear=True, figsize=[10, 5])
             if not plt_tau:
                 self.ax = [self.ax]
 
@@ -336,25 +340,25 @@ class CalibrationProblem:
             self.ax[0].set_title('One-point spectra')
             self.lines_SP_model = [None]*(self.vdim+1)
             self.lines_SP_data = [None]*(self.vdim+1)
-
+            clr=['red','blue','green','magenta']
             for i in range(self.vdim):
                 self.lines_SP_model[i], = self.ax[0].plot(
-                    k1, self.kF_model_vals[i], 'o-', label=r'$F{0:d}$ model'.format(i+1))
+                    k1, self.kF_model_vals[i], 'o-', color=clr[i],label=r'$F{0:d}$ model'.format(i+1))
             for i in range(self.vdim):
                 self.lines_SP_data[i],  = self.ax[0].plot(
-                    k1, self.kF_data_vals[i], '--', label=r'$F{0:d}$ data'.format(i+1))
+                    k1, self.kF_data_vals[i], '--', color=clr[i], label=r'$F{0:d}$ data'.format(i+1))
             if 3 in self.curves:
                 self.lines_SP_model[self.vdim], = self.ax[0].plot(
-                    k1, -self.kF_model_vals[self.vdim], 'o-', label=r'$-F_{13}$ model')
+                    k1, -self.kF_model_vals[self.vdim], 'o-',color=clr[3], label=r'$-F_{13}$ model')
                 self.lines_SP_data[self.vdim],  = self.ax[0].plot(
-                    k1, -self.kF_data_vals[self.vdim], '--', label=r'$-F_{13}$ data')
+                    k1, -self.kF_data_vals[self.vdim], '--',color=clr[3],label=r'$-F_{13}$ data')
             self.ax[0].legend()
             self.ax[0].set_xscale('log')
             self.ax[0].set_yscale('log')
             self.ax[0].set_xlabel(r'$k_1$')
             self.ax[0].set_ylabel(r'$k_1 F_i /u_*^2$')
             self.ax[0].grid(which='both')
-            self.ax[0].set_aspect(3/4)
+            #self.ax[0].set_aspect(1/2)
 
             if plt_tau:
                 # Subplot 2: Eddy Lifetime
@@ -396,7 +400,7 @@ class CalibrationProblem:
         if 3 in self.curves:
             self.lines_SP_model[self.vdim].set_ydata(
                 -self.kF_model_vals[self.vdim])
-        self.ax[0].set_aspect(3/4)
+        #self.ax[0].set_aspect(1)
 
         if plt_tau:
             self.tau_model1 = self.OPS.EddyLifetime(k_1).detach().numpy()
@@ -422,7 +426,7 @@ class CalibrationProblem:
             self.fig.canvas.flush_events()
         else:
             self.fig.savefig(self.output_directory+'Final_solution.png',format='png',dpi=100)
-            plt.fig.savefig(self.output_directory+'Final_solution.png',format='png',dpi=100)
+            plt.savefig(self.output_directory+'Final_solution.png',format='png',dpi=100)
 
 
 ############################################################################

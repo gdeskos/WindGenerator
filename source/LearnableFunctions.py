@@ -53,7 +53,7 @@ class Rational(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
         self.fg_learn_nu = kwargs.get('learn_nu', True)
-        self.nu = -1/3
+        self.nu = -1./3.
         if self.fg_learn_nu:
             self.nu = nn.Parameter(torch.tensor(float(self.nu)))
         # self.scale = nn.Parameter(torch.tensor(1.))

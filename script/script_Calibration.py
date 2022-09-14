@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import sys
 sys.path.append('../')
 import os
@@ -37,15 +31,15 @@ config = {
     'nlayers'           :   2,
     'hidden_layer_size' :   10,
     # 'nModes'            :   5, ### number of modes in the rational function in tauNet ### deprecated
-    'learn_nu'          :   False, ### NOTE: Experiment 1: False, Experiment 2: True
+    'learn_nu'          :   True, ### NOTE: Experiment 1: False, Experiment 2: True
     'plt_tau'           :   True,
     'tol'               :   1.e-3, ### not important
     'lr'                :   1,     ### learning rate
     'penalty'           :   1.e-1,
-    'regularization'    :   1.e-1,
+    'regularization'    :   1.e-5,
     'nepochs'           :   2,
     'curves'            :   [0,1,2,3],
-    'data_type'         :   'Custom', ### 'Kaimal', 'SimiuScanlan', 'SimiuYeo', 'iso'
+    'data_type'         :   'Custom', ### 'Kaimal', 'iso'
     'spectra_file'      :   'Spectra.dat',
     'Uref'              :   8.08, # m/s
     'zref'              :   100, #m
@@ -70,18 +64,12 @@ Uref=config['Uref']; # Average Hub height velocity in m/s
 #Lambda1=42; # Longitudinal turbulence scale parameter at hub height
 
 
-#Mann model parameters
-#Gamma = 3.9
-#sigma = 0.55*sigma1
-#L=0.8*Lambda1;
-
-
 z0=0.1
 ustar=0.41*Uref/log(zref/z0)
 
-L     = 0.59*zref
+L     = 14.09
 Gamma = 3.9
-sigma = 6.4/zref**(2./3.) * L**(5./3.)/200
+sigma = 0.1517
 
 print(L,Gamma,sigma)
 
@@ -100,7 +88,6 @@ if(config['data_type']=='Custom'):
         f=CustomData[:,0]
         k1_data_pts=2*np.pi*f/Uref
 
-print(k1_data_pts)
 DataPoints  = [ (k1, 1) for k1 in k1_data_pts ]
 Data = OnePointSpectraDataGenerator(DataPoints=DataPoints, **config).Data
 
@@ -161,7 +148,7 @@ opt_params = pb.calibrate(Data=Data, **config)#, OptimizerClass=torch.optim.RMSp
 # In[ ]:
 
 
-####################################
+ ####################################
 ### Export
 ####################################
 if 'opt_params' not in locals():
@@ -169,4 +156,7 @@ if 'opt_params' not in locals():
 filename = config['output_folder'] + config['type_EddyLifetime'] + '_' + config['data_type'] + '.pkl'
 with open(filename, 'wb') as file:
     pickle.dump([config, opt_params, Data, pb.loss_history_total, pb.loss_history_epochs], file)
-
+filename2 = config['output_folder'] + 'Convergence.dat'
+with open(filename2, 'w') as fout:
+    for index in range(len(pb.loss_history_total)):
+        fout.write(str(pb.loss_history_total[index])+'\n')

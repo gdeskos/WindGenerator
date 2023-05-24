@@ -21,13 +21,8 @@ class GenerateWind:
 
     def __init__(self, friction_velocity, reference_height, grid_dimensions, grid_levels, seed=None, blend_num=10, **kwargs):
 
-        model = kwargs.get('model','Mann') ### 'FPDE_RDT', 'Mann', 'VK', 'NN'
+        model = kwargs.get('model','NN') ### 'FPDE_RDT', 'Mann', 'VK', 'NN'
         print(model)
-        # # Parameters taken from pg 13 of M. Andre's dissertation
-        # # model = 'FPDE_RDT'
-        # model = 'Mann'
-        # # model = 'VK'
-        # model = 'NN'
 
         if model == 'NN':
             path_to_parameters = kwargs.get('path_to_parameters', None)
@@ -159,14 +154,14 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     normalize = False
-    friction_velocity = 0.1
-    reference_height = 90.
+    friction_velocity = 0.46
+    reference_height = 100.
     roughness_height = 0.01
-    grid_dimensions = np.array([1000.0, 3000, 1000])
+    grid_dimensions = np.array([1000.0, 1000, 1000])
     grid_levels = np.array([5, 5, 5])
     seed = None #9000
 
-    path_to_parameters = '../data/tauNet_Kaimal.pkl'
+    path_to_parameters = '../data2/tauNet_Custom.pkl'
 
     wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
     #wind = GenerateWind(friction_velocity, reference_height, grid_dimensions, grid_levels, seed, model='NN', path_to_parameters=path_to_parameters)
@@ -207,7 +202,7 @@ if __name__ == "__main__":
 
     ###################
     ## Export to vtk
-    FileName = '../data/WindField/OntheFlyWindField'
+    FileName = '../data2/WindField/OntheFlyWindField'
     spacing = tuple(grid_dimensions/(2.0**grid_levels + 1))
 
     wind_field_vtk = tuple([np.copy(wind_field[...,i], order='C') for i in range(3)])

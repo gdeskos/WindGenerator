@@ -17,10 +17,7 @@ from source.common import *
 from source.Calibration import CalibrationProblem
 from source.DataGenerator import OnePointSpectraDataGenerator
 
-
 # In[2]:
-
-
 ####################################
 ### Configuration
 ####################################
